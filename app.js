@@ -4,7 +4,14 @@
     document.getElementById('app').innerHTML = '<main class="auth-wrap"><div class="card auth-card"><h1>Configuração incompleta</h1><p>Revise config.js.</p></div></main>';
     return;
   }
-  const sb = window.supabase.createClient(cfg.supabaseUrl, cfg.supabasePublishableKey);
+  // Capture callback errors before the SDK consumes the URL fragment.
+  const authReturn = new URLSearchParams(location.hash.slice(1));
+  window.APP_AUTH_RETURN = {
+    error: authReturn.get('error_code') || authReturn.get('error'),
+    type: authReturn.get('type')
+  };
+  // Share one Auth client with the confirmation screen to avoid session races.
+  const sb = window.APP_SUPABASE = window.supabase.createClient(cfg.supabaseUrl, cfg.supabasePublishableKey);
   const app = document.getElementById('app');
   const toast = document.getElementById('toast');
   const money = (v) => Number(v || 0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
@@ -35,7 +42,7 @@
   }
   async function checkRef(code){ const hint=document.getElementById('refHint'); if(!hint||!code.trim()) return; try{ const d=await rpc('consultar_indicador',{p_codigo:code.trim()}); hint.textContent=d?.encontrado?`Indicador: ${d.nome}`:'Código não encontrado'; }catch(e){hint.textContent='Não foi possível validar agora';} }
   async function login(e){ e.preventDefault(); const f=new FormData(e.target); try{ const {data,error}=await sb.auth.signInWithPassword({email:f.get('email'),password:f.get('password')}); if(error) throw error; session=data.session; await finishPendingProfile(); await loadDashboard(); }catch(err){showToast(err.message,'error');} }
-  async function signup(e){ e.preventDefault(); const f=new FormData(e.target); const profile={nome:f.get('nome'),whatsapp:f.get('whatsapp'),ref:f.get('ref')||null}; try{ if(profile.ref){const chk=await rpc('consultar_indicador',{p_codigo:profile.ref}); if(!chk?.encontrado) throw new Error('Código de indicação inválido');} const {data,error}=await sb.auth.signUp({email:f.get('email'),password:f.get('password')}); if(error) throw error; localStorage.setItem('pendingProfile',JSON.stringify(profile)); if(data.session){session=data.session; await finishPendingProfile(); await loadDashboard();} else {showToast('Conta criada. Confirme seu e-mail e depois entre.'); renderAuth('login');} }catch(err){showToast(err.message,'error');} }
+  async function signup(e){ e.preventDefault(); const f=new FormData(e.target); const profile={nome:f.get('nome'),whatsapp:f.get('whatsapp'),ref:f.get('ref')||null}; try{ if(profile.ref){const chk=await rpc('consultar_indicador',{p_codigo:profile.ref}); if(!chk?.encontrado) throw new Error('Código de indicação inválido');} const {data,error}=await sb.auth.signUp({email:f.get('email'),password:f.get('password'),options:{emailRedirectTo:cfg.siteUrl || new URL('./',location.href).href}}); if(error) throw error; localStorage.setItem('pendingProfile',JSON.stringify(profile)); if(data.session){session=data.session; await finishPendingProfile(); await loadDashboard();} else {showToast('Conta criada. Confirme seu e-mail e depois entre.'); renderAuth('login');} }catch(err){showToast(err.message,'error');} }
   async function finishPendingProfile(){ const raw=localStorage.getItem('pendingProfile'); if(!raw||!session) return; try{const p=JSON.parse(raw); await rpc('completar_cadastro',{p_nome:p.nome,p_telefone_whatsapp:p.whatsapp,p_codigo_patrocinador:p.ref||null}); localStorage.removeItem('pendingProfile');}catch(e){ if(!/idempot/i.test(e.message)) console.warn(e); } }
   async function loadDashboard(){ try{dashboard=await rpc('meu_dashboard'); if(!dashboard?.cadastro_completo){return renderCompleteProfile();} try{adminData=await rpc('admin_dashboard');}catch{adminData=null;} renderApp();}catch(e){showToast(e.message,'error');} }
   function renderCompleteProfile(){ app.innerHTML=`<main class="auth-wrap"><section class="card auth-card"><h1>Complete seu cadastro</h1><form id="completeForm" class="grid"><div class="field"><label>Nome</label><input name="nome" required></div><div class="field"><label>WhatsApp</label><input name="whatsapp" required></div><div class="field"><label>Código do indicador</label><input name="ref" value="${esc(refFromUrl)}"></div><button class="btn btn-primary">Concluir</button></form></section></main>`; document.getElementById('completeForm').onsubmit=async e=>{e.preventDefault();const f=new FormData(e.target);try{await rpc('completar_cadastro',{p_nome:f.get('nome'),p_telefone_whatsapp:f.get('whatsapp'),p_codigo_patrocinador:f.get('ref')||null});await loadDashboard();}catch(err){showToast(err.message,'error')}}; }

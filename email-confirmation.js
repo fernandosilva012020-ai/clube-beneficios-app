@@ -2,9 +2,8 @@
   const WAIT_KEY = 'awaitingEmailConfirmation';
   const PROFILE_KEY = 'pendingProfile';
   const cfg = window.APP_CONFIG;
-  if (!cfg?.supabaseUrl || !cfg?.supabasePublishableKey || !window.supabase) return;
-
-  const sbEmail = window.supabase.createClient(cfg.supabaseUrl, cfg.supabasePublishableKey);
+  const sbEmail = window.APP_SUPABASE;
+  if (!cfg || !sbEmail) return;
   const app = document.getElementById('app');
   let rendering = false;
 
@@ -12,7 +11,24 @@
     '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
   }[c]));
 
-  const redirectUrl = () => `${location.origin}${location.pathname}`;
+  const redirectUrl = () => cfg.siteUrl || new URL('./', location.href).href;
+
+  function showCallbackError() {
+    if (!window.APP_AUTH_RETURN?.error) return;
+    const message = window.APP_AUTH_RETURN.error === 'otp_expired'
+      ? 'Este link de confirmação expirou ou já foi usado. Se ainda não confirmou sua conta, solicite um novo e-mail. Se já confirmou, volte para o login.'
+      : 'Não foi possível confirmar seu e-mail com este link. Solicite um novo e-mail de confirmação.';
+    if (document.getElementById('confirmEmailStatus')) {
+      setStatus(message, 'error');
+    } else {
+      const toast = document.getElementById('toast');
+      if (toast) {
+        toast.className = 'toast show error';
+        toast.textContent = message;
+      }
+    }
+    history.replaceState(null, '', `${location.pathname}${location.search}`);
+  }
 
   function setStatus(message, type = 'ok') {
     const el = document.getElementById('confirmEmailStatus');
@@ -49,7 +65,7 @@
         <button class="confirm-email-primary" id="confirmEmailChecked" type="button">Já confirmei meu e-mail</button>
         <button class="confirm-email-secondary" id="confirmEmailResend" type="button">Reenviar e-mail</button>
       </div>
-      <div id="confirmEmailStatus" class="confirm-email-status"></div>
+      <div id="confirmEmailStatus" class="confirm-email-status" role="status" aria-live="polite"></div>
       <p class="confirm-email-note">Não encontrou a mensagem? Confira também <strong>Spam</strong>, <strong>Lixo eletrônico</strong> e <strong>Promoções</strong>.</p>
       <button class="confirm-email-link" id="confirmEmailBack" type="button">Voltar para o login</button>
     </section></main>`;
@@ -80,13 +96,16 @@
       button.disabled = true;
       button.textContent = 'Verificando...';
       try {
-        const { data } = await sbEmail.auth.getSession();
+        const { data, error } = await sbEmail.auth.getSession();
+        if (error) throw error;
         if (data.session?.user?.email_confirmed_at) {
           localStorage.removeItem(WAIT_KEY);
           location.reload();
           return;
         }
-        setStatus('Abra o link recebido no e-mail. Ao confirmar, você será redirecionado automaticamente para o site.', 'error');
+        setStatus('Abra o link recebido no e-mail. Se você já confirmou em outro navegador ou celular, volte para o login e entre com seu e-mail e senha.', 'error');
+      } catch (error) {
+        setStatus('Não foi possível verificar agora. Confira sua conexão e tente novamente.', 'error');
       } finally {
         button.disabled = false;
         button.textContent = 'Já confirmei meu e-mail';
@@ -166,20 +185,33 @@
   sbEmail.auth.onAuthStateChange((event, session) => {
     if (session?.user?.email_confirmed_at && localStorage.getItem(WAIT_KEY)) {
       localStorage.removeItem(WAIT_KEY);
-      setTimeout(showConfirmedBanner, 700);
+      // Finish the profile and load the dashboard after Auth releases its lock.
+      if (document.querySelector('.confirm-email-card')) {
+        setTimeout(() => location.reload(), 0);
+      } else {
+        setTimeout(showConfirmedBanner, 700);
+      }
     }
   });
 
   async function restoreConfirmationScreen() {
     const waitingEmail = localStorage.getItem(WAIT_KEY);
-    if (!waitingEmail) return;
-    const { data } = await sbEmail.auth.getSession();
-    if (data.session?.user?.email_confirmed_at) {
-      localStorage.removeItem(WAIT_KEY);
-      showConfirmedBanner();
-      return;
+    try {
+      const { data, error } = await sbEmail.auth.getSession();
+      if (error) throw error;
+      if (data.session?.user?.email_confirmed_at) {
+        localStorage.removeItem(WAIT_KEY);
+        if (waitingEmail || window.APP_AUTH_RETURN?.type === 'signup') showConfirmedBanner();
+        return;
+      }
+      if (waitingEmail) renderConfirmEmail(waitingEmail);
+      showCallbackError();
+    } catch (error) {
+      if (waitingEmail) {
+        renderConfirmEmail(waitingEmail);
+        setStatus('Não foi possível verificar agora. Confira sua conexão e tente novamente.', 'error');
+      }
     }
-    renderConfirmEmail(waitingEmail);
   }
 
   const observer = new MutationObserver(() => {

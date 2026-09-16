@@ -1,4 +1,5 @@
 window.APP_CONFIG = {
+  siteUrl: 'https://fernandosilva012020-ai.github.io/clube-beneficios-app/',
   supabaseUrl: 'https://iscoxpsizfxjpkbojykc.supabase.co',
   supabasePublishableKey: 'sb_publishable_zF7ILHiLiEvFIxWrlxkSHA_JBjhShW6',
   // Preencha quando escolher o PSP (Mercado Pago, Asaas, etc.).
