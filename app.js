@@ -22,10 +22,11 @@
   const rpc = async (name,args={}) => { const {data,error}=await sb.rpc(name,args); if(error) throw error; return data; };
   const refFromUrl = new URLSearchParams(location.search).get('ref') || '';
   let session=null, dashboard=null, adminData=null, activeTab='inicio';
+  let pixCharge=null, pixPollTimer=null;
 
   async function boot(){
     const {data}=await sb.auth.getSession(); session=data.session;
-    sb.auth.onAuthStateChange((_event,s)=>{ session=s; if(!s) renderAuth(); });
+    sb.auth.onAuthStateChange((_event,s)=>{ session=s; if(!s){ pixCharge=null; clearTimeout(pixPollTimer); activeTab='inicio'; renderAuth(); } });
     if(session){ await finishPendingProfile(); await loadDashboard(); } else renderAuth();
   }
 
@@ -48,6 +49,7 @@
   function renderCompleteProfile(){ app.innerHTML=`<main class="auth-wrap"><section class="card auth-card"><h1>Complete seu cadastro</h1><form id="completeForm" class="grid"><div class="field"><label>Nome</label><input name="nome" required></div><div class="field"><label>WhatsApp</label><input name="whatsapp" required></div><div class="field"><label>Código do indicador</label><input name="ref" value="${esc(refFromUrl)}"></div><button class="btn btn-primary">Concluir</button></form></section></main>`; document.getElementById('completeForm').onsubmit=async e=>{e.preventDefault();const f=new FormData(e.target);try{await rpc('completar_cadastro',{p_nome:f.get('nome'),p_telefone_whatsapp:f.get('whatsapp'),p_codigo_patrocinador:f.get('ref')||null});await loadDashboard();}catch(err){showToast(err.message,'error')}}; }
 
   function renderApp(){
+    clearTimeout(pixPollTimer);
     const u=dashboard.usuario, a=dashboard.assinatura, s=dashboard.saldos;
     const nav=['inicio','tabuleiros','mensalidade','indicacoes','pix']; if(adminData) nav.push('admin');
     app.innerHTML=`<main class="shell"><header class="topbar"><div class="brand"><div class="brand-mark">2×1</div><div><h1>${esc(cfg.appName)}</h1><div class="muted small">Olá, ${esc(u.nome)}</div></div></div><div class="actions"><span class="badge ${statusClass(u.status)}">${esc(u.status)}</span><button class="btn btn-secondary" id="logout">Sair</button></div></header>
@@ -57,8 +59,103 @@
   }
   function homeView(u,a,s){const g=dashboard.ganhos||{};return `<section class="section"><div class="hero"><div><div class="muted small">PAINEL DO MEMBRO</div><h2>${esc(u.nome)}</h2></div><span class="badge ${statusClass(a.status)}">Assinatura ${esc(a.status)}</span></div><div class="grid grid-4"><div class="stat"><div class="label">Saldo disponível</div><div class="value">${money(s.disponivel)}</div></div><div class="stat"><div class="label">Bloqueado</div><div class="value">${money(s.bloqueado)}</div></div><div class="stat"><div class="label">Indicações diretas</div><div class="value">${dashboard.indicacoes_diretas||0}</div></div><div class="stat"><div class="label">Próximo vencimento</div><div class="value" style="font-size:18px">${dt(a.proximo_vencimento)}</div></div></div><div class="section grid grid-3"><div class="stat"><div class="label">Ganhos Tabuleiros</div><div class="value">${money(g.tabuleiros)}</div></div><div class="stat"><div class="label">Ganhos Unilevel</div><div class="value">${money(g.unilevel)}</div></div><div class="stat"><div class="label">Fidelidade</div><div class="value">${money(g.fidelidade)}</div></div></div><div class="section notice"><strong>Como funciona:</strong> a renovação mensal mantém os benefícios ativos e alimenta os pools. Ela não cria nova Bronze. Reentrada acontece somente após a conclusão do Diamante.</div></section>`}
   function boardsView(){const names={1:'Bronze',2:'Prata',3:'Ouro',4:'Platina',5:'Diamante'};const rows=dashboard.tabuleiros||[];return `<section class="section card"><div class="section-head"><h2>Meus Tabuleiros</h2><span class="muted small">FIFO global por fase</span></div>${rows.length?`<div class="grid">${rows.map(p=>`<div class="phase"><div class="phase-num">${p.fase}</div><div><strong>${names[p.fase]||'Fase '+p.fase}</strong> <span class="badge ${statusClass(p.status)}">${esc(p.status)}</span><div class="progress"><span style="width:${Math.min(100,(Number(p.apoios)||0)*50)}%"></span></div><div class="muted small">Apoios: ${p.apoios}/2 · posição estimada na fila: ${p.posicao_fila}</div></div><div class="nowrap">#${p.ordem_fila}</div></div>`).join('')}</div>`:'<div class="empty">Nenhuma posição criada ainda.</div>'}</section>`}
-  function billingView(a){return `<section class="section grid grid-2"><div class="card"><h2>Mensalidade</h2><p class="muted">Valor mensal: <strong>R$49,90</strong></p><p>Status: <span class="badge ${statusClass(a.status)}">${esc(a.status)}</span></p><p>Vencimento: ${dt(a.proximo_vencimento)}<br><span class="muted small">Tolerância até ${dt(a.tolerancia_ate)}</span></p><button id="charge" class="btn btn-primary">Gerar cobrança</button></div><div class="card"><h2>Rateio da mensalidade</h2><table><tbody><tr><td>Tabuleiros</td><td>R$30,00</td></tr><tr><td>Unilevel</td><td>R$7,00</td></tr><tr><td>Fidelidade</td><td>R$3,00</td></tr><tr><td>Operação</td><td>R$9,90</td></tr></tbody></table><div id="chargeResult" class="small muted"></div></div></section>`}
-  function bindBilling(){document.getElementById('charge').onclick=async()=>{const b=document.getElementById('charge');b.disabled=true;try{const d=await rpc('criar_cobranca_mensal',{p_chave_idempotencia:crypto.randomUUID()});document.getElementById('chargeResult').innerHTML=`<div class="notice"><strong>${esc(d.tipo)}</strong><br>Pagamento interno: <code>${esc(d.pagamento_id)}</code></div>`;if(cfg.paymentAdapterUrl){const token=session.access_token;const r=await fetch(cfg.paymentAdapterUrl,{method:'POST',headers:{'content-type':'application/json','authorization':`Bearer ${token}`},body:JSON.stringify({pagamento_id:d.pagamento_id})});const out=await r.json();if(!r.ok)throw new Error(out.error||'Falha no adapter de pagamento');document.getElementById('chargeResult').innerHTML+=`<pre>${esc(JSON.stringify(out,null,2))}</pre>`;}else{showToast('Cobrança criada. Falta conectar o provedor PIX para gerar o QR Code.');}}catch(e){showToast(e.message,'error')}finally{b.disabled=false}}}
+  function billingView(a){
+    const active = a.status === 'ATIVA' && new Date(a.proximo_vencimento) > new Date();
+    return `<section class="section grid grid-2"><div class="card">
+      <h2>Mensalidade</h2><p class="muted">Valor mensal: <strong>R$49,90</strong></p>
+      <p>Status: <span class="badge ${statusClass(a.status)}">${esc(a.status)}</span></p>
+      <p>Vencimento: ${dt(a.proximo_vencimento)}<br><span class="muted small">Tolerância até ${dt(a.tolerancia_ate)}</span></p>
+      ${active ? '<div class="notice">Sua mensalidade está em dia.</div>' : `<form id="chargeForm" class="grid">
+        <div class="field"><label for="billingDocument">CPF ou CNPJ do titular</label>
+        <input id="billingDocument" name="cpf_cnpj" maxlength="18" autocomplete="off" required placeholder="CPF ou CNPJ">
+        <span class="small muted">Seu documento, nome e e-mail serão usados pelo Asaas para emitir a cobrança.</span></div>
+        <button id="charge" class="btn btn-primary">Gerar PIX de R$49,90</button></form>`}
+      <div id="chargeResult" class="section" aria-live="polite"></div>
+    </div><div class="card"><h2>Rateio da mensalidade</h2><div class="table-wrap">
+      <table class="billing-breakdown"><tbody><tr><td>Tabuleiros</td><td>R$30,00</td></tr><tr><td>Unilevel</td><td>R$7,00</td></tr><tr><td>Fidelidade</td><td>R$3,00</td></tr><tr><td>Operação</td><td>R$9,90</td></tr></tbody></table>
+    </div><p class="small muted">A assinatura é ativada após a confirmação do recebimento pelo Asaas.</p></div></section>`;
+  }
+  async function paymentRequest(body){
+    if(!cfg.paymentAdapterUrl) throw new Error('O pagamento PIX ainda não está disponível.');
+    const {data,error}=await sb.auth.getSession();
+    if(error || !data.session) throw new Error('Entre novamente na sua conta para continuar.');
+    const response=await fetch(cfg.paymentAdapterUrl,{
+      method:'POST', headers:{'content-type':'application/json','authorization':`Bearer ${data.session.access_token}`,'apikey':cfg.supabasePublishableKey},
+      body:JSON.stringify(body)
+    });
+    let out; try{out=await response.json();}catch{throw new Error('Não foi possível acessar o serviço de pagamento.');}
+    if(!response.ok) throw new Error(out.error || 'Não foi possível preparar seu PIX agora.');
+    return out;
+  }
+  async function paymentConfirmed(){
+    pixCharge=null; clearTimeout(pixPollTimer);
+    showToast('Pagamento recebido! Sua assinatura está ativa.');
+    await loadDashboard();
+  }
+  function renderPixCharge(){
+    const el=document.getElementById('chargeResult');
+    if(!el || !pixCharge) return;
+    const form=document.getElementById('chargeForm'); if(form) form.hidden=true;
+    const code=pixCharge.pix_copy_paste;
+    const image=pixCharge.qr_code_base64;
+    const validImage=typeof image==='string' && image.length<500000 && /^[A-Za-z0-9+/=\r\n]+$/.test(image);
+    el.innerHTML=`<div class="pix-payment">
+      <h3>Mensalidade de R$49,90</h3>
+      ${code ? `<p>Escaneie o QR Code ou copie o código para pagar no aplicativo do seu banco.</p>
+        ${validImage?`<img class="pix-qr" src="data:image/png;base64,${esc(image)}" alt="QR Code PIX da mensalidade de R$49,90">`:''}
+        <label class="small" for="pixCopyCode">PIX Copia e Cola</label>
+        <textarea id="pixCopyCode" class="pix-code" readonly rows="3">${esc(code)}</textarea>
+        <button class="btn btn-primary" type="button" id="copyPix">Copiar código PIX</button>`:
+        '<p>O Asaas está processando seu pagamento. Aguarde a confirmação do recebimento.</p>'}
+      <p id="pixPaymentStatus" class="small muted" role="status">Aguardando confirmação do pagamento.</p>
+      <button class="btn btn-secondary" type="button" id="checkPix">Já paguei — verificar</button>
+    </div>`;
+    document.getElementById('copyPix')?.addEventListener('click',async()=>{
+      try{await navigator.clipboard.writeText(code);showToast('Código PIX copiado.');}
+      catch{const field=document.getElementById('pixCopyCode');field.focus();field.select();showToast('Selecione e copie o código acima.');}
+    });
+    document.getElementById('checkPix').onclick=async e=>{
+      const b=e.currentTarget;b.disabled=true;
+      const id=pixCharge.pagamento_id,userId=session?.user?.id;
+      try{
+        const result=await paymentRequest({action:'status',pagamento_id:id});
+        if(session?.user?.id!==userId || pixCharge?.pagamento_id!==id) return;
+        if(result.paid) return await paymentConfirmed();
+        const status=document.getElementById('pixPaymentStatus');
+        if(status) status.textContent='O recebimento ainda não foi confirmado pelo Asaas. Aguarde alguns instantes.';
+      }catch(error){showToast(error.message,'error');}finally{b.disabled=false;}
+    };
+    pollPixPayment(pixCharge.pagamento_id, session?.user?.id);
+  }
+  function pollPixPayment(id,userId,attempt=0){
+    clearTimeout(pixPollTimer);
+    if(attempt>=75) return;
+    pixPollTimer=setTimeout(async()=>{
+      if(activeTab!=='mensalidade' || pixCharge?.pagamento_id!==id || session?.user?.id!==userId) return;
+      try{
+        const {data,error}=await sb.from('pagamentos').select('status').eq('id',id).maybeSingle();
+        if(activeTab!=='mensalidade' || pixCharge?.pagamento_id!==id || session?.user?.id!==userId) return;
+        if(!error && data?.status==='CONFIRMADO') return await paymentConfirmed();
+      }catch{}
+      pollPixPayment(id,userId,attempt+1);
+    },8000);
+  }
+  function bindBilling(){
+    const form=document.getElementById('chargeForm');
+    if(form) form.onsubmit=async e=>{
+      e.preventDefault();const button=document.getElementById('charge');button.disabled=true;button.textContent='Preparando PIX...';
+      const userId=session?.user?.id;
+      try{
+        const out=await paymentRequest({action:'create',cpf_cnpj:new FormData(form).get('cpf_cnpj')});
+        if(session?.user?.id!==userId) return;
+        if(out.paid) return await paymentConfirmed();
+        if(out.already_active){showToast('Sua mensalidade já está em dia.');return await loadDashboard();}
+        pixCharge=out;form.reset();renderPixCharge();
+      }catch(error){showToast(error.message,'error');}
+      finally{button.disabled=false;button.textContent='Gerar PIX de R$49,90';}
+    };
+    if(pixCharge && form) renderPixCharge();
+  }
   function refView(u){const link=`${location.origin}${location.pathname}?ref=${encodeURIComponent(u.codigo_indicacao)}`;return `<section class="section grid grid-2"><div class="card"><h2>Seu código</h2><div class="codebox"><code>${esc(u.codigo_indicacao)}</code><button class="btn btn-secondary" data-copy="${esc(u.codigo_indicacao)}">Copiar</button></div><p class="muted small">Genealogia permanente. Avanço no tabuleiro não altera patrocinador.</p></div><div class="card"><h2>Seu link</h2><div class="codebox"><code style="font-size:12px;word-break:break-all">${esc(link)}</code><button class="btn btn-secondary" data-copy="${esc(link)}">Copiar</button></div><p>Indicações diretas: <strong>${dashboard.indicacoes_diretas||0}</strong></p></div></section>`}
   function bindRef(){document.querySelectorAll('[data-copy]').forEach(b=>b.onclick=async()=>{await navigator.clipboard.writeText(b.dataset.copy);showToast('Copiado!')})}
   function pixView(){const saques=dashboard.saques||[];return `<section class="section grid grid-2"><div class="card"><h2>Chave PIX</h2><form id="pixForm" class="grid"><div class="field"><label>Tipo</label><select name="tipo"><option>CPF</option><option>CNPJ</option><option>EMAIL</option><option>TELEFONE</option><option>ALEATORIA</option></select></div><div class="field"><label>Chave</label><input name="chave" required></div><button class="btn btn-primary">Salvar chave ativa</button></form><div id="pixCurrent" class="small muted" style="margin-top:12px"></div></div><div class="card"><h2>Solicitar saque</h2><form id="withdrawForm" class="grid"><div class="field"><label>Valor (R$)</label><input name="valor" type="number" step="0.01" min="0.01" required></div><button class="btn btn-primary">Solicitar</button></form><p class="muted small">O valor sai do saldo disponível e fica bloqueado até o PSP confirmar ou falhar.</p></div></section><section class="section card"><h2>Últimos saques</h2>${saques.length?`<div class="table-wrap"><table><thead><tr><th>Data</th><th>Valor</th><th>Status</th></tr></thead><tbody>${saques.map(s=>`<tr><td>${dt(s.solicitado_em)}</td><td>${money(s.valor)}</td><td><span class="badge ${statusClass(s.status)}">${esc(s.status)}</span></td></tr>`).join('')}</tbody></table></div>`:'<div class="empty">Nenhum saque solicitado.</div>'}</section>`}

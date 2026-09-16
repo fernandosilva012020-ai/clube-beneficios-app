@@ -1,0 +1,8 @@
+project_id = "clube-beneficios-app"
+
+[functions.asaas-create-pix]
+verify_jwt = true
+
+# The handler requires the Asaas webhook token and checks the payment via its API.
+[functions.asaas-webhook]
+verify_jwt = false

@@ -16,7 +16,7 @@ Acesse `http://localhost:8080`.
 
 `config.js` já aponta para o projeto Supabase e usa **publishable key**, que é própria para frontend. Nunca coloque `service_role`/secret key no navegador.
 
-O campo `paymentAdapterUrl` está vazio de propósito. O banco gera a cobrança interna e possui a RPC de confirmação do gateway, mas o QR Code/PIX depende do PSP escolhido e das credenciais comerciais dessa conta.
+O campo `paymentAdapterUrl` aponta para a Edge Function `asaas-create-pix`. A integração gera PIX de R$49,90 e confirma o recebimento no servidor. Ela permanece desativada até configurar as credenciais e o webhook conforme [Configurar Asaas](docs/ASAAS_SETUP.md).
 
 ### Confirmação de e-mail no GitHub Pages
 
@@ -31,7 +31,7 @@ No projeto Supabase `tabuleiros`, abra [Authentication → URL Configuration](ht
 
 Mantenha **Confirm email** ativado em Authentication → Sign In / Providers → Email. No template de confirmação, o botão deve usar `{{ .ConfirmationURL }}` para validar a conta antes de retornar à aplicação. Não use apenas o endereço do site como link do botão.
 
-Essas configurações são do serviço hospedado: alterar `config.js` não altera os campos no painel do Supabase. Na verificação de 16/09/2026, a confirmação estava ativada, mas o redirecionamento do servidor ainda retornava `http://localhost:3000`.
+Essas configurações são do serviço hospedado: alterar `config.js` não altera os campos no painel do Supabase. Em 16/09/2026, após o ajuste no painel, o redirecionamento para o GitHub Pages foi verificado e o responsável relatou que o recebimento e a confirmação por e-mail estavam funcionando.
 
 Após salvar, solicite um novo e-mail no botão **Reenviar e-mail**. Links anteriores podem manter o endereço antigo. Valide o cadastro com um endereço que você controla, abra o link e confira a entrada no painel; links expirados exibem uma mensagem na aplicação.
 
@@ -42,7 +42,7 @@ Para enviar confirmações aos clientes, configure [SMTP próprio](https://supab
 - cadastro/login Supabase Auth;
 - indicação por `?ref=CODIGO`;
 - conclusão do perfil e assinatura pendente;
-- geração de cobrança mensal de R$49,90;
+- cobrança mensal de R$49,90 por PIX Asaas, com QR Code e Copia e Cola (depende da configuração das credenciais);
 - dashboard com saldos, assinatura e ganhos;
 - tabuleiros Bronze → Diamante e posição estimada na fila;
 - código/link de indicação;
@@ -61,9 +61,18 @@ select public.definir_administrador('<UUID_DO_USUARIO>', true);
 
 ## Produção
 
-1. Escolher/conectar PSP para cobrança PIX e transferências.
-2. Implementar o adapter descrito em `docs/GATEWAY_ADAPTER.md`.
-3. Configurar URL do site em Auth > URL Configuration e os redirects de e-mail.
-4. Configurar SMTP próprio para e-mails transacionais em produção.
-5. Hospedar esta pasta em HTTPS (Cloudflare Pages, Netlify, Vercel static, etc.).
-6. Fazer revisão jurídica/contábil/fiscal antes de lançamento comercial.
+O frontend é publicado no [GitHub Pages](https://fernandosilva012020-ai.github.io/clube-beneficios-app/). As funções de pagamento são publicadas separadamente no Supabase.
+
+1. Configurar o Asaas e validar o recebimento conforme [ASAAS_SETUP.md](docs/ASAAS_SETUP.md).
+2. Implementar transferências/saques e o tratamento contábil de estornos; esta integração cobre recebimento de mensalidades.
+3. Acompanhar a entrega dos webhooks e dos e-mails transacionais.
+
+## Verificação local
+
+Com Node.js 22 ou superior, sem dependências adicionais:
+
+```bash
+node --test tests/*.test.mjs
+```
+
+Os testes usam serviços simulados; não criam cobranças reais nem substituem a validação na conta Asaas.
