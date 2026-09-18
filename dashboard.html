@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Painel — Prosperidade Digital</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="dashboard.css" />
+</head>
+<body>
+  <aside class="sidebar">
+    <a class="brand" href="index.html"><span class="brand-mark">PD</span><span><b>Prosperidade</b><small>Digital</small></span></a>
+    <nav>
+      <button class="nav-item active" data-view="inicio">⌂ <span>Visão geral</span></button>
+      <button class="nav-item" data-view="cursos">▣ <span>Cursos</span></button>
+      <button class="nav-item" data-view="ferramentas">⚙ <span>Ferramentas</span></button>
+      <button class="nav-item" data-view="ias">✦ <span>IAs</span></button>
+      <button class="nav-item" data-view="rede">⌘ <span>Minha rede</span></button>
+      <button class="nav-item" data-view="comissoes">◈ <span>Comissões</span></button>
+      <button class="nav-item" data-view="assinatura">◉ <span>Assinatura</span></button>
+    </nav>
+    <div class="sidebar-foot"><a href="index.html">← Voltar ao site</a></div>
+  </aside>
+
+  <main class="dashboard">
+    <header class="dash-header">
+      <div><small>ÁREA DO MEMBRO</small><h1 id="pageTitle">Visão geral</h1></div>
+      <div class="member"><span class="avatar">FS</span><div><b>Fernando</b><small>Membro ativo</small></div></div>
+    </header>
+    <section id="view"></section>
+  </main>
+  <script src="dashboard.js"></script>
+</body>
+</html>

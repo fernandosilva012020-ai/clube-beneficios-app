@@ -1,20 +1,170 @@
 <!doctype html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#0f172a" />
-  <title>Clube de Benefícios 2x1</title>
-  <link rel="preconnect" href="https://cdn.jsdelivr.net" />
-  <link rel="stylesheet" href="./styles.css" />
-  <link rel="stylesheet" href="./email-confirmation.css" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#08090d" />
+  <title>Prosperidade Digital — Clube de Cursos, Ferramentas e IAs</title>
+  <meta name="description" content="Clube digital com cursos, ferramentas, IAs e programa de indicação configurável." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <div id="toast" class="toast" aria-live="polite"></div>
-  <div id="app"></div>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.min.js" crossorigin="anonymous" onerror="document.getElementById('app').innerHTML='<main class=&quot;shell&quot;><div class=&quot;card&quot;><h1>Falha ao carregar biblioteca</h1><p>Verifique sua conexão ou hospede supabase-js localmente.</p></div></main>'"></script>
-  <script src="./config.js"></script>
-  <script src="./app.js"></script>
-  <script src="./email-confirmation.js"></script>
+  <div class="page-glow page-glow-a"></div>
+  <div class="page-glow page-glow-b"></div>
+
+  <header class="site-header">
+    <a class="brand" href="#inicio" aria-label="Prosperidade Digital">
+      <span class="brand-mark">PD</span>
+      <span class="brand-copy"><strong>Prosperidade</strong><small>Digital</small></span>
+    </a>
+    <nav class="desktop-nav">
+      <a href="#beneficios">Benefícios</a>
+      <a href="#conteudos">Conteúdos</a>
+      <a href="#indicacoes">Indicações</a>
+      <a href="#como-funciona">Como funciona</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn-ghost" data-open-login>Entrar</button>
+      <a class="btn btn-primary" href="#participar">Quero participar</a>
+    </div>
+  </header>
+
+  <main>
+    <section id="inicio" class="hero section-shell">
+      <div class="hero-copy reveal">
+        <div class="eyebrow"><span></span> Educação, tecnologia e comunidade</div>
+        <h1>Um clube para transformar <em>conhecimento</em> em evolução.</h1>
+        <p>Tenha acesso em um só lugar a cursos, ferramentas digitais, recursos de inteligência artificial e uma estrutura de indicação configurável para o seu negócio.</p>
+        <div class="hero-actions">
+          <a class="btn btn-primary btn-lg" href="#participar">Conhecer o clube</a>
+          <button class="btn btn-ghost btn-lg" data-open-demo>Ver painel de demonstração</button>
+        </div>
+        <div class="hero-trust">
+          <div><strong>1</strong><span>assinatura</span></div>
+          <div><strong>3</strong><span>categorias digitais</span></div>
+          <div><strong>100%</strong><span>online</span></div>
+        </div>
+      </div>
+
+      <div class="hero-visual reveal delay-1" aria-hidden="true">
+        <div class="orbit orbit-a"></div>
+        <div class="orbit orbit-b"></div>
+        <div class="hero-card main-card">
+          <div class="mini-label">ÁREA DO MEMBRO</div>
+          <h3>Seu ecossistema digital</h3>
+          <div class="mock-metrics">
+            <article><span>Cursos</span><strong>24</strong></article>
+            <article><span>Ferramentas</span><strong>12</strong></article>
+            <article><span>IAs</span><strong>08</strong></article>
+          </div>
+          <div class="activity-line"><span></span><span></span><span></span><span></span><span></span></div>
+          <div class="mock-footer"><b>Link de indicação</b><code>/convite/SEU-CODIGO</code></div>
+        </div>
+        <div class="floating-card fc-1">IA <strong>24h</strong></div>
+        <div class="floating-card fc-2">Cursos <strong>Premium</strong></div>
+        <div class="floating-card fc-3">Rede <strong>Config.</strong></div>
+      </div>
+    </section>
+
+    <section class="marquee-wrap" aria-hidden="true">
+      <div class="marquee">CURSOS • FERRAMENTAS • INTELIGÊNCIA ARTIFICIAL • COMUNIDADE • INDICAÇÕES • DESENVOLVIMENTO • CURSOS • FERRAMENTAS • INTELIGÊNCIA ARTIFICIAL •</div>
+    </section>
+
+    <section id="beneficios" class="section-shell section-block">
+      <div class="section-heading reveal">
+        <div class="eyebrow"><span></span> Tudo em um único ambiente</div>
+        <h2>Benefícios que entregam valor antes de falar em indicação.</h2>
+        <p>O produto principal é o acesso digital. O programa de indicação é um recurso complementar e pode ser ajustado pelo administrador.</p>
+      </div>
+      <div class="feature-grid">
+        <article class="feature-card reveal"><div class="feature-icon">01</div><h3>Biblioteca de cursos</h3><p>Organize treinamentos por trilhas, níveis e categorias, com progresso do aluno salvo no perfil.</p></article>
+        <article class="feature-card reveal delay-1"><div class="feature-icon">02</div><h3>Ferramentas exclusivas</h3><p>Centralize utilitários, templates, calculadoras, automações e outros recursos para membros.</p></article>
+        <article class="feature-card reveal delay-2"><div class="feature-icon">03</div><h3>Hub de inteligências artificiais</h3><p>Disponibilize atalhos, prompts, assistentes e soluções próprias ou integradas em uma área protegida.</p></article>
+        <article class="feature-card reveal"><div class="feature-icon">04</div><h3>Programa de indicação</h3><p>Cada membro recebe um link individual. Níveis e regras de comissão ficam configuráveis no painel administrativo.</p></article>
+      </div>
+    </section>
+
+    <section id="conteudos" class="section-shell section-block split-section">
+      <div class="showcase reveal">
+        <div class="showcase-tabs"><button class="active">Cursos</button><button>Ferramentas</button><button>IAs</button></div>
+        <div class="showcase-list">
+          <article><span class="thumb t1"></span><div><small>TRILHA 01</small><h4>Fundamentos do Digital</h4><p>Comece pelo essencial.</p></div><b>→</b></article>
+          <article><span class="thumb t2"></span><div><small>TRILHA 02</small><h4>Produtividade com IA</h4><p>Automatize tarefas repetitivas.</p></div><b>→</b></article>
+          <article><span class="thumb t3"></span><div><small>TRILHA 03</small><h4>Vendas e Atendimento</h4><p>Melhore sua operação comercial.</p></div><b>→</b></article>
+        </div>
+      </div>
+      <div class="section-heading reveal delay-1">
+        <div class="eyebrow"><span></span> Conteúdo que evolui</div>
+        <h2>Você decide o que entra no clube.</h2>
+        <p>O catálogo foi pensado para crescer com o negócio. O administrador cadastra conteúdos, controla disponibilidade e organiza o que cada plano pode acessar.</p>
+        <ul class="check-list">
+          <li>Cadastro de cursos e módulos</li>
+          <li>Links e recursos exclusivos para membros</li>
+          <li>Controle de acesso por assinatura</li>
+          <li>Atualização sem refazer o site</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="indicacoes" class="network-section">
+      <div class="section-shell network-inner">
+        <div class="section-heading reveal">
+          <div class="eyebrow"><span></span> Rede transparente</div>
+          <h2>Indicações com regras claras e rastreáveis.</h2>
+          <p>O sistema registra quem indicou cada membro, mostra a rede no painel e calcula comissões apenas com regras definidas pelo administrador.</p>
+          <div class="notice">Sem promessa de renda garantida. Os percentuais, elegibilidade e eventos que geram comissão precisam estar ligados ao produto e definidos nas regras do negócio.</div>
+        </div>
+        <div class="network-card reveal delay-1">
+          <div class="node root">VOCÊ</div>
+          <div class="connector c1"></div><div class="connector c2"></div>
+          <div class="node n1">A</div><div class="node n2">B</div>
+          <div class="connector c3"></div><div class="connector c4"></div><div class="connector c5"></div><div class="connector c6"></div>
+          <div class="node sm s1">A1</div><div class="node sm s2">A2</div><div class="node sm s3">B1</div><div class="node sm s4">B2</div>
+          <div class="network-caption"><b>Exemplo visual</b><span>Níveis e limites são configuráveis.</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="como-funciona" class="section-shell section-block">
+      <div class="section-heading centered reveal">
+        <div class="eyebrow"><span></span> Jornada simples</div>
+        <h2>Do cadastro ao acesso em quatro etapas.</h2>
+      </div>
+      <div class="steps-grid">
+        <article class="step reveal"><span>1</span><h3>Cadastro</h3><p>O visitante cria a conta e confirma o e-mail.</p></article>
+        <article class="step reveal delay-1"><span>2</span><h3>Assinatura</h3><p>O sistema registra o plano e libera o pagamento configurado.</p></article>
+        <article class="step reveal delay-2"><span>3</span><h3>Acesso</h3><p>Com assinatura ativa, o membro entra no conteúdo exclusivo.</p></article>
+        <article class="step reveal delay-3"><span>4</span><h3>Indicação</h3><p>O membro compartilha o próprio link e acompanha sua rede.</p></article>
+      </div>
+    </section>
+
+    <section id="participar" class="cta-section section-shell reveal">
+      <div><div class="eyebrow"><span></span> Projeto independente</div><h2>Seu clube. Sua marca. Suas regras.</h2><p>Uma estrutura própria para vender acesso digital, organizar membros e crescer com uma operação de indicação configurável.</p></div>
+      <button class="btn btn-primary btn-lg" data-open-signup>Quero criar minha conta</button>
+    </section>
+  </main>
+
+  <footer class="site-footer section-shell">
+    <div class="brand"><span class="brand-mark">PD</span><span class="brand-copy"><strong>Prosperidade</strong><small>Digital</small></span></div>
+    <p>Plataforma demonstrativa. Regras comerciais, preços, comissões e integrações devem ser definidos antes do lançamento.</p>
+  </footer>
+
+  <dialog id="authDialog" class="auth-dialog">
+    <button class="dialog-close" data-close-dialog aria-label="Fechar">×</button>
+    <div class="dialog-brand"><span class="brand-mark">PD</span><div><h3 id="dialogTitle">Entrar</h3><p id="dialogSubtitle">Acesse sua área de membro.</p></div></div>
+    <form id="authForm" class="auth-form">
+      <label class="signup-only">Nome completo<input name="name" autocomplete="name"></label>
+      <label>E-mail<input name="email" type="email" autocomplete="email" required></label>
+      <label>Senha<input name="password" type="password" minlength="8" required></label>
+      <label class="signup-only">Código de indicação <small>(opcional)</small><input name="ref"></label>
+      <button class="btn btn-primary" type="submit" id="authSubmit">Entrar</button>
+      <p class="dialog-switch" id="dialogSwitch">Ainda não tem conta? <button type="button" data-switch-auth>Criar conta</button></p>
+    </form>
+  </dialog>
+
+  <script src="app.js"></script>
 </body>
 </html>
