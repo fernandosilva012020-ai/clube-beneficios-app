@@ -167,8 +167,29 @@ window.choosePlan=slug=>{ $('payMsg').textContent='Plano '+slug.toUpperCase()+' 
 async function loadQueue(){
  const {data,error}=await sb.rpc('clube20_my_queue_dashboard');
  if(error){$('queueList').innerHTML='<div class="notice err">Não foi possível carregar sua fila.</div>';return}
- $('queueList').innerHTML=(data||[]).map(x=>{const cur=Number(x.direct_sales_count||0),tar=Number(x.direct_sales_target||4),pct=Math.min(100,cur/tar*100);return '<div class="qrow"><div class="row"><b>'+x.level_name+'</b><span class="badge">'+(x.my_position?'#'+x.my_position:'sem posição')+'</span></div><div class="muted">Ciclo '+(x.cycle_no||'—')+' • Reentrada '+(x.reentry_no||0)+' • '+cur+'/'+tar+' vendas</div><div class="bar"><div class="fill" style="width:'+pct+'%"></div></div></div>'}).join('')||'<div class="notice">Você ainda não possui posição ativa.</div>';
+ const rows=data||[];
+ const groups={};
+ rows.forEach(x=>{
+   const key=x.level_slug;
+   if(!groups[key]) groups[key]={name:x.level_name,slug:x.level_slug,items:[]};
+   if(x.queue_entry_id) groups[key].items.push(x);
+ });
+ $('queueList').innerHTML=Object.values(groups).map(g=>{
+   const positions=g.items.length?g.items.map(x=>{
+     const cur=Number(x.direct_sales_count||0),tar=Number(x.direct_sales_target||4),pct=Math.min(100,cur/tar*100);
+     return '<div style="padding:11px 0;border-top:1px solid #292929"><div class="row"><span class="muted">Ciclo '+(x.cycle_no||'—')+' • Reentrada '+(x.reentry_no||0)+'</span><span class="badge">#'+x.my_position+'</span></div><div class="muted">'+cur+'/'+tar+' vendas diretas confirmadas</div><div class="bar"><div class="fill" style="width:'+pct+'%"></div></div></div>';
+   }).join(''):'<div class="muted" style="padding:10px 0">Sem posição ativa.</div>';
+   return '<div class="qrow"><div class="row"><b>'+g.name+'</b><span class="badge">'+g.items.length+' ativa'+(g.items.length===1?'':'s')+'</span></div>'+positions+'<button class="btn btnGold" style="margin-top:12px" onclick="window.addPosition(\''+g.slug+'\')">NOVA POSIÇÃO</button><div class="tiny" style="margin-top:8px">Nova posição não gera saldo sozinha e não duplica comissão. Cada venda confirmada conta uma vez e avança uma posição por vez.</div></div>';
+ }).join('')||'<div class="notice">Você ainda não possui posição ativa.</div>';
 }
+window.addPosition=async(levelSlug)=>{
+ const ok=confirm('Criar uma nova posição neste nível? Ela entra no fim da fila e começa em 0/4. Isso não gera saldo por si só.');
+ if(!ok)return;
+ const {error}=await sb.rpc('clube20_add_queue_position',{p_level_slug:levelSlug});
+ if(error){alert(error.message||'Não foi possível criar a posição.');return}
+ await loadQueue();
+ alert('Nova posição criada no final da fila.');
+};
 async function loadCourses(){
  const [c,l,p]=await Promise.all([sb.from('clube20_courses').select('*').eq('active',true).order('sort_order'),sb.from('clube20_lessons').select('*').eq('active',true).order('course_slug').order('sort_order'),sb.from('clube20_course_progress').select('lesson_slug,completed').eq('user_id',user.id)]);
  courses=c.data||[];lessons=l.data||[];progress={};(p.data||[]).forEach(x=>progress[x.lesson_slug]=!!x.completed);renderCourses();
