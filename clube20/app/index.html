@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#080808"><title>Clube 20 — App</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:#0a0a0a;color:#f7f7f7}button,input,select,textarea{font:inherit}a{color:inherit;text-decoration:none}.app{width:min(100%,520px);min-height:100vh;margin:auto;background:#0d0d0d;position:relative;padding-bottom:78px}.top{position:sticky;top:0;z-index:20;height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;background:#090909ee;border-bottom:1px solid #2b2317;backdrop-filter:blur(12px)}.brand{font-weight:950;font-size:20px}.brand span{color:#f6b938}.pill{border:1px solid #6d5120;border-radius:999px;padding:7px 10px;color:#ffd270;font-size:11px;font-weight:900}.page{display:none;padding:16px}.page.active{display:block}.hero{padding:24px 0 8px}.hero h1{font-size:34px;line-height:1.05;margin:0 0 10px}.hero p,.muted{color:#aaa;line-height:1.5}.card{background:#151515;border:1px solid #2a261f;border-radius:22px;padding:16px;margin-bottom:14px}.goldcard{background:linear-gradient(145deg,#1f170a,#0b0b0b);border-color:#7b5920}.card h2,.card h3{margin:0 0 8px}.money{font-size:34px;font-weight:950;color:#ffd064}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.stat{background:#111;border:1px solid #2b2b2b;border-radius:18px;padding:14px}.stat small{color:#999}.stat b{display:block;font-size:20px;margin-top:5px}.btn{width:100%;border:0;border-radius:999px;padding:13px 16px;font-weight:950;cursor:pointer}.btnGold{background:linear-gradient(#ffc64e,#da8d00);color:#17100a}.btnDark{background:#242424;color:#fff;border:1px solid #3b3b3b}.btnSoft{background:#eee;color:#111}.row{display:flex;align-items:center;justify-content:space-between;gap:12px}.input{width:100%;padding:13px 14px;border-radius:14px;border:1px solid #343434;background:#0c0c0c;color:#fff;margin:6px 0 11px}.label{font-size:12px;color:#aaa;font-weight:800}.notice{padding:12px;border-radius:14px;background:#231b0c;border:1px solid #6d5120;color:#ffd477;font-size:13px;line-height:1.45}.ok{background:#0d2718;border-color:#246a43;color:#8ff1b6}.err{background:#2b1010;border-color:#783030;color:#ffabab}.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(100%,520px);height:70px;background:#0c0c0cf2;border-top:1px solid #2c271f;display:none;z-index:30}.nav.on{display:flex}.nav button{flex:1;border:0;background:transparent;color:#888;font-size:10px;font-weight:900}.nav button.active{color:#f5b63a}.ico{font-size:20px;display:block;margin-bottom:3px}.level{padding:14px;border:1px solid #4c3a1b;border-radius:18px;margin-bottom:10px;background:#101010}.level h3{margin:0}.price{font-size:21px;color:#ffc75b;font-weight:950}.queue{display:grid;gap:10px}.qrow{padding:14px;border-radius:18px;background:#111;border:1px solid #2d2d2d}.bar{height:8px;border-radius:99px;background:#292929;overflow:hidden;margin-top:8px}.fill{height:100%;background:linear-gradient(90deg,#d98b00,#ffd064)}.course{border:1px solid #4f3a17;border-radius:18px;padding:14px;margin-bottom:10px;background:#111}.lesson{display:flex;gap:9px;align-items:flex-start;border-top:1px solid #292929;padding:9px 0}.lesson:first-of-type{border-top:0}.lesson input{margin-top:3px}.toolbox textarea{min-height:92px}.result{white-space:pre-wrap;background:#070707;border:1px solid #2f2f2f;border-radius:14px;padding:13px;color:#ddd;line-height:1.5}.linkbox{word-break:break-all;background:#080808;border:1px solid #2d2d2d;border-radius:13px;padding:11px;font-size:12px}.auth{padding:26px 16px}.auth h1{font-size:38px;margin:18px 0 8px}.tabs{display:flex;gap:8px;margin-bottom:14px}.tabs button{flex:1}.hidden{display:none!important}.tiny{font-size:11px;color:#888}.badge{display:inline-flex;align-items:center;gap:6px;padding:7px 10px;border-radius:999px;background:#241a0b;border:1px solid #70511c;color:#ffd071;font-size:11px;font-weight:950}.copy{width:auto;padding:9px 12px}.spinner{opacity:.65;pointer-events:none}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="top"><div class="brand">CLUBE <span>20</span></div><div id="topBadge" class="pill">OFFLINE</div></header>
+
+<section id="auth" class="auth">
+  <span class="badge">🔐 Acesso por convite</span>
+  <h1>Entre no Clube 20</h1>
+  <p class="muted">Cursos, ferramentas, fila de ciclos, comissões por vendas reais e Piscina Liderança.</p>
+  <div class="tabs"><button class="btn btnGold" id="tabLogin">ENTRAR</button><button class="btn btnDark" id="tabSignup">CADASTRAR</button></div>
+  <div class="card">
+    <div id="signupNameWrap" class="hidden"><div class="label">Nome</div><input class="input" id="name" placeholder="Seu nome"></div>
+    <div class="label">E-mail</div><input class="input" id="email" type="email" placeholder="seuemail@gmail.com">
+    <div class="label">Senha</div><input class="input" id="password" type="password" placeholder="Sua senha">
+    <div id="inviteWrap" class="hidden"><div class="label">Código de convite</div><input class="input" id="invite" placeholder="Ex.: FERNANDO20"></div>
+    <button class="btn btnGold" id="authBtn">ENTRAR</button>
+    <div id="authMsg" class="notice hidden" style="margin-top:12px"></div>
+  </div>
+  <p class="tiny">Ao usar a plataforma, você concorda que ganhos e comissões, quando aplicáveis, dependem de vendas efetivamente confirmadas. Não há garantia de renda.</p>
+</section>
+
+<main id="member" class="hidden">
+<section id="home" class="page active">
+  <div class="hero"><div id="founderBadge" class="badge hidden">👑 FUNDADOR / DONO</div><h1 id="hello">Olá!</h1><p>Seu painel do Clube 20.</p></div>
+  <div class="card goldcard"><div class="label">DISPONÍVEL PARA SAQUE</div><div id="balance" class="money">R$ 0,00</div><p class="muted">Comissões disponíveis + piscina já fechada.</p></div>
+  <div class="grid2">
+    <div class="stat"><small>Comissão direta</small><b>50%</b></div>
+    <div class="stat"><small>Nível 2</small><b>10%</b></div>
+    <div class="stat"><small>Nível 3</small><b>5%</b></div>
+    <div class="stat"><small>Piscina</small><b>3%</b></div>
+  </div>
+  <div class="card goldcard" style="margin-top:14px"><h3>🏊 Piscina Liderança</h3><div id="poolStatus" class="muted">Carregando...</div></div>
+  <div class="card"><h3>Seus níveis</h3><div id="memberships" class="muted">Carregando...</div></div>
+</section>
+
+<section id="queue" class="page">
+  <div class="hero"><h1>Fila & ciclos</h1><p>Meta: 4 vendas diretas confirmadas por ciclo. Ao concluir, uma nova posição entra no final.</p></div>
+  <div id="queueList" class="queue"></div>
+</section>
+
+<section id="courses" class="page">
+  <div class="hero"><h1>Cursos</h1><p>Seu progresso fica salvo na sua conta.</p></div>
+  <div id="courseList"></div>
+</section>
+
+<section id="ai" class="page">
+  <div class="hero"><h1>Ferramentas IA</h1><p>Geradores rápidos para marketing e vendas.</p></div>
+  <div class="card toolbox">
+    <div class="label">Ferramenta</div>
+    <select id="tool" class="input"><option value="ad">Anúncio</option><option value="wa">Mensagem WhatsApp</option><option value="video">Roteiro de vídeo</option><option value="ideas">Ideias de conteúdo</option><option value="prompt">Criador de prompt</option></select>
+    <div class="label">Assunto / produto</div><textarea id="subject" class="input" placeholder="Ex.: curso de Canva para iniciantes"></textarea>
+    <div class="label">Público</div><input id="audience" class="input" placeholder="Ex.: pequenos empreendedores">
+    <button class="btn btnGold" id="generate">GERAR</button>
+    <div id="aiResult" class="result" style="margin-top:12px">O resultado aparece aqui.</div>
+  </div>
+</section>
+
+<section id="invites" class="page">
+  <div class="hero"><h1>Indicações</h1><p>Compartilhe seu código. Comissões são geradas somente sobre vendas confirmadas.</p></div>
+  <div class="card"><div class="label">SEU CÓDIGO</div><div class="row"><div id="inviteCode" class="money" style="font-size:26px">—</div><button class="btn btnDark copy" id="copyCode">COPIAR</button></div></div>
+  <div class="card"><div class="label">SEU LINK</div><div id="inviteLink" class="linkbox">—</div><button class="btn btnGold" id="copyLink" style="margin-top:10px">COPIAR LINK</button></div>
+</section>
+
+<section id="buy" class="page">
+  <div class="hero"><h1>Planos</h1><p>Escolha o nível de acesso. O PIX integrado será ativado após as credenciais de produção do Mercado Pago.</p></div>
+  <div id="levelList"></div>
+  <div id="payMsg" class="notice">Pagamento real ainda em configuração. Não envie PIX fora do fluxo oficial do site.</div>
+</section>
+
+<section id="profile" class="page">
+  <div class="hero"><h1>Minha conta</h1></div>
+  <div class="card"><div id="profileInfo"></div><button class="btn btnDark" id="refreshBtn" style="margin-top:12px">ATUALIZAR DADOS</button><button class="btn btnSoft" id="logoutBtn" style="margin-top:10px">SAIR</button></div>
+</section>
+</main>
+
+<nav id="nav" class="nav">
+<button data-page="home" class="active"><span class="ico">⌂</span>INÍCIO</button>
+<button data-page="queue"><span class="ico">↕</span>FILA</button>
+<button data-page="courses"><span class="ico">▶</span>CURSOS</button>
+<button data-page="invites"><span class="ico">⌁</span>INDICAR</button>
+<button data-page="profile"><span class="ico">●</span>CONTA</button>
+</nav>
+</div>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+const SB_URL='https://jddgebxqwmxngfitcftb.supabase.co';
+const SB_KEY='sb_publishable_Cjh1IP0PWmozDUm8gH7jMQ_bpQ1u6tu';
+const sb=createClient(SB_URL,SB_KEY);
+const $=id=>document.getElementById(id);
+const brl=n=>Number(n||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+let signup=false,user=null,profile=null,courses=[],lessons=[],progress={};
+
+function msg(text,type=''){const e=$('authMsg');e.textContent=text;e.className='notice '+(type||'');e.classList.remove('hidden')}
+function setMode(mode){signup=mode==='signup';$('signupNameWrap').classList.toggle('hidden',!signup);$('inviteWrap').classList.toggle('hidden',!signup);$('authBtn').textContent=signup?'CRIAR CONTA':'ENTRAR';$('tabSignup').className='btn '+(signup?'btnGold':'btnDark');$('tabLogin').className='btn '+(!signup?'btnGold':'btnDark')}
+$('tabLogin').onclick=()=>setMode('login');$('tabSignup').onclick=()=>setMode('signup');
+
+async function ensureProfile(u){
+ const ref=new URLSearchParams(location.search).get('ref')||$('invite').value.trim()||null;
+ const full=$('name').value.trim()||u.user_metadata?.full_name||u.email?.split('@')[0]||'Membro';
+ const code=(full.replace(/[^a-z0-9]/gi,'').slice(0,8)+(u.id||'').replace(/-/g,'').slice(-4)).toUpperCase();
+ await sb.from('clube20_profiles').upsert({id:u.id,full_name:full,display_name:full.split(' ')[0],invite_code:code,referred_by_code:ref,updated_at:new Date().toISOString()},{onConflict:'id'});
+}
+$('authBtn').onclick=async()=>{
+ const email=$('email').value.trim(),password=$('password').value;
+ if(!email||!password)return msg('Preencha e-mail e senha.','err');
+ $('authBtn').classList.add('spinner');
+ try{
+  if(signup){
+    const name=$('name').value.trim(),invite=$('invite').value.trim();
+    if(!name||!invite)throw new Error('Informe seu nome e o código de convite.');
+    const {data,error}=await sb.auth.signUp({email,password,options:{data:{full_name:name}}});if(error)throw error;
+    if(data.user)await ensureProfile(data.user);
+    if(!data.session){msg('Cadastro criado. Confirme o e-mail e depois entre.','ok');return}
+  }else{
+    const {error}=await sb.auth.signInWithPassword({email,password});if(error)throw error;
+  }
+  await boot();
+ }catch(e){msg(e.message||'Não foi possível continuar.','err')}
+ finally{$('authBtn').classList.remove('spinner')}
+};
+
+async function boot(){
+ const {data:{session}}=await sb.auth.getSession();
+ if(!session){$('auth').classList.remove('hidden');$('member').classList.add('hidden');$('nav').classList.remove('on');$('topBadge').textContent='OFFLINE';return}
+ user=session.user;$('auth').classList.add('hidden');$('member').classList.remove('hidden');$('nav').classList.add('on');$('topBadge').textContent='ONLINE';
+ await Promise.all([loadProfile(),loadWallet(),loadPool(),loadMemberships(),loadQueue(),loadCourses()]);
+ show('home');
+}
+async function loadProfile(){
+ let {data}=await sb.from('clube20_profiles').select('*').eq('id',user.id).maybeSingle();
+ if(!data){await ensureProfile(user);({data}=await sb.from('clube20_profiles').select('*').eq('id',user.id).maybeSingle())}
+ profile=data||{};$('hello').textContent='Olá, '+(profile.display_name||user.email?.split('@')[0]||'membro')+'!';
+ $('founderBadge').classList.toggle('hidden',!profile.is_founder&&!profile.is_owner);
+ $('inviteCode').textContent=profile.invite_code||'—';
+ const link=location.origin+location.pathname+'?ref='+encodeURIComponent(profile.invite_code||'');
+ $('inviteLink').textContent=link;
+ $('profileInfo').innerHTML='<b>'+(profile.full_name||'Membro')+'</b><br><span class="muted">'+(user.email||'')+'</span><br><br><span class="badge">'+(profile.is_founder?'👑 Fundador':'Membro')+'</span>';
+}
+async function loadWallet(){
+ const [c,p]=await Promise.all([
+  sb.from('clube20_commissions').select('amount').eq('beneficiary_user_id',user.id).eq('status','available'),
+  sb.from('clube20_pool_allocations').select('amount').eq('beneficiary_user_id',user.id).eq('status','available')
+ ]);
+ const total=[...(c.data||[]),...(p.data||[])].reduce((s,x)=>s+Number(x.amount||0),0);$('balance').textContent=brl(total);
+}
+async function loadPool(){
+ const {data,error}=await sb.rpc('clube20_my_pool_status');const x=Array.isArray(data)?data[0]:data;
+ if(error||!x){$('poolStatus').textContent='Sem dados da piscina no momento.';return}
+ $('poolStatus').innerHTML='<b>'+(x.qualified?'QUALIFICADO':'AINDA NÃO QUALIFICADO')+'</b><br>Clientes ativos: '+x.active_network_clients+' / '+x.min_active_network_clients+'<br>Volume mensal: '+brl(x.network_volume)+' / '+brl(x.min_monthly_network_volume)+'<br>Piscina estimada: '+brl(x.estimated_pool_amount)+'<br>Sua estimativa: '+brl(x.estimated_amount);
+}
+async function loadMemberships(){
+ const [{data:m},{data:l}]=await Promise.all([sb.from('clube20_memberships').select('level_slug,status').eq('user_id',user.id).eq('status','active'),sb.from('clube20_levels').select('*').eq('active',true).order('sort_order')]);
+ const set=new Set((m||[]).map(x=>x.level_slug));
+ $('memberships').innerHTML=(l||[]).map(x=>'<div class="row" style="padding:8px 0;border-bottom:1px solid #292929"><span>'+x.name+'</span><b style="color:'+(set.has(x.slug)?'#89efb3':'#777')+'">'+(set.has(x.slug)?'ATIVO':'NÃO ATIVO')+'</b></div>').join('');
+ $('levelList').innerHTML=(l||[]).map(x=>'<div class="level"><div class="row"><div><h3>'+x.name+'</h3><span class="muted">Crédito: '+brl(x.course_credit)+'</span></div><div class="price">'+brl(x.access_price)+'</div></div><button class="btn btnGold" style="margin-top:12px" onclick="window.choosePlan(\''+x.slug+'\')">ESCOLHER '+x.name.toUpperCase()+'</button></div>').join('');
+}
+window.choosePlan=slug=>{ $('payMsg').textContent='Plano '+slug.toUpperCase()+' selecionado. O QR PIX será liberado aqui quando concluirmos as credenciais do Mercado Pago.';$('payMsg').className='notice ok'; };
+async function loadQueue(){
+ const {data,error}=await sb.rpc('clube20_my_queue_dashboard');
+ if(error){$('queueList').innerHTML='<div class="notice err">Não foi possível carregar sua fila.</div>';return}
+ $('queueList').innerHTML=(data||[]).map(x=>{const cur=Number(x.direct_sales_count||0),tar=Number(x.direct_sales_target||4),pct=Math.min(100,cur/tar*100);return '<div class="qrow"><div class="row"><b>'+x.level_name+'</b><span class="badge">'+(x.my_position?'#'+x.my_position:'sem posição')+'</span></div><div class="muted">Ciclo '+(x.cycle_no||'—')+' • Reentrada '+(x.reentry_no||0)+' • '+cur+'/'+tar+' vendas</div><div class="bar"><div class="fill" style="width:'+pct+'%"></div></div></div>'}).join('')||'<div class="notice">Você ainda não possui posição ativa.</div>';
+}
+async function loadCourses(){
+ const [c,l,p]=await Promise.all([sb.from('clube20_courses').select('*').eq('active',true).order('sort_order'),sb.from('clube20_lessons').select('*').eq('active',true).order('course_slug').order('sort_order'),sb.from('clube20_course_progress').select('lesson_slug,completed').eq('user_id',user.id)]);
+ courses=c.data||[];lessons=l.data||[];progress={};(p.data||[]).forEach(x=>progress[x.lesson_slug]=!!x.completed);renderCourses();
+}
+function renderCourses(){
+ $('courseList').innerHTML=courses.map(c=>{const ls=lessons.filter(l=>l.course_slug===c.slug);return '<div class="course"><h3>'+c.title+'</h3><p class="muted">'+(c.description||'')+'</p>'+ls.map(l=>'<label class="lesson"><input type="checkbox" '+(progress[l.slug]?'checked':'')+' onchange="window.toggleLesson(\''+l.slug+'\',this.checked)"><span><b>'+l.title+'</b><br><span class="tiny">'+(l.description||'')+'</span></span></label>').join('')+'</div>'}).join('')||'<div class="notice">Cursos serão carregados do Supabase.</div>';
+}
+window.toggleLesson=async(slug,done)=>{progress[slug]=done;await sb.from('clube20_course_progress').upsert({user_id:user.id,lesson_slug:slug,completed:done,completed_at:done?new Date().toISOString():null,updated_at:new Date().toISOString()},{onConflict:'user_id,lesson_slug'})};
+$('generate').onclick=()=>{const tool=$('tool').value,s=$('subject').value.trim()||'seu produto',a=$('audience').value.trim()||'seu público';let out='';if(tool==='ad')out='🔥 '+s+'\n\nUma solução pensada para '+a+'. Destaque o principal benefício, mostre como funciona e finalize com uma chamada clara para ação.\n\n👉 Fale conosco para saber mais.';if(tool==='wa')out='Olá! Tudo bem? Vi que você pode se interessar por '+s+'. Preparei uma explicação rápida pensando em '+a+'. Posso te enviar os detalhes?';if(tool==='video')out='ROTEIRO CURTO\n1. Gancho: Você ainda tem dificuldade com '+s+'?\n2. Problema: explique em 1 frase.\n3. Solução: mostre o benefício principal para '+a+'.\n4. Prova/demonstração.\n5. CTA: chame para conhecer.';if(tool==='ideas')out='5 ideias sobre '+s+':\n1. Erro comum\n2. Antes e depois\n3. Passo a passo\n4. Dúvida frequente\n5. Caso prático para '+a; if(tool==='prompt')out='Crie um conteúdo profissional sobre "'+s+'" para '+a+'. Use linguagem clara, destaque benefícios concretos, evite promessas irreais e termine com uma chamada para ação.';$('aiResult').textContent=out};
+$('copyCode').onclick=()=>navigator.clipboard.writeText(profile?.invite_code||'');$('copyLink').onclick=()=>navigator.clipboard.writeText($('inviteLink').textContent);
+$('logoutBtn').onclick=async()=>{await sb.auth.signOut();location.reload()};$('refreshBtn').onclick=()=>boot();
+
+function show(id){document.querySelectorAll('.page').forEach(x=>x.classList.toggle('active',x.id===id));document.querySelectorAll('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.page===id));if(id==='home'){loadWallet();loadPool()}if(id==='queue')loadQueue()}
+document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>show(b.dataset.page));
+const ref=new URLSearchParams(location.search).get('ref');if(ref){setMode('signup');$('invite').value=ref}
+sb.auth.onAuthStateChange((ev)=>{if(ev==='SIGNED_IN')boot()});boot();
+</script>
+</body></html>
